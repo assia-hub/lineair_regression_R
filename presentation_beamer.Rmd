@@ -1,0 +1,543 @@
+---
+title: | 
+   | La Régression Linéaire Multiple   
+   | Modèle biologique : estimation de l'âge des ormeaux    
+subtitle: |
+   | L3 Bio-Informatique (ISV51)
+author: |
+   |  Assia Bemehdia^[benmehdia.assia@gmail.com]
+   |  Pauline Spinga^[spinga.pauline@gmail.com]
+   |  groupe 6
+date: " 17/12/2020"
+output: 
+   beamer_presentation: 
+      latex_engine: xelatex 
+      theme: "Rochester" 
+      highlight: "espresso" 
+colortheme : "beaver"
+header-includes: 
+- \logo{\includegraphics[height= 1 cm]{logo.png}}
+
+---
+
+```{r setup, include=FALSE}
+library(reshape2)
+library(ggplot2)
+library("AppliedPredictiveModeling")
+knitr::opts_chunk$set(echo = FALSE)
+```
+## **Objectif**  
+* Existe-il un lien entre l'âge d'un organisme et ces mesures physiques ?  
+* Quelle méthode statistique doit-on utilisée pour répondre à cette question biologique ?  
+
+$$\Downarrow$$  
+\color{blue}
+Prédire l'âge des ormeaux via un modèle de régression linéaire multiple élaboré avec le langage de programmation R.  
+\color{black}
+
+## **Présentation du package**
+Pour ce projet nous avons construit et utilisé un package de 4 fonctions :  
+
+-	Identite(coeff,hat,seuil)  
+-	Simulation(sigma,coeff,n,seuil)  
+-	Resultat_simu(res)  
+-	Histog_simu(sigma_inf,coeff,n)  
+
+## **Plan**  
+
+\begin{enumerate}
+\item Introduction
+\item La régression linéaire simple
+\item La régression linéaire multiple
+\item Estimation du modèle de la régression linéaire multiple
+\item Simulation du modèle de la régression linéaire multiple
+\item Application du modèle sur des données réelles 
+\item Conclusion
+\item Perspectives 
+\item Reférences 
+\end{enumerate}
+
+
+
+## **Introduction**
+La régression linéaire :
+
+*  **définition :** Un modèle de régression linéaire est un modèle qui cherche à établir une relation linéaire entre une variable, dite expliquée, et une ou plusieurs variables, dites explicatives.
+
+*  **type :**  
+
+\begin{enumerate}
+\item La régression linéaire simple 
+  $$ y = a_{0} + a_{1} x_{1} + \varepsilon $$    
+\item La régression linéaire multiple 
+  $$ y = a_{0} + a_{1} x_{1} + a_{2} x_{2} + ... + a_{p} x_{p} + \varepsilon $$
+\end{enumerate}
+  $\longrightarrow$ plusieurs variables explicatives           
+
+
+## **Introduction** 
+
+$$y = a_{0} + a_{1} x_{1} + \varepsilon$$
+$$y = a_{0} + a_{1} x_{1} + a_{2} x_{2} + ... + a_{p} x_{p} + \varepsilon$$  \color{blue}$$\downarrow$$ \color{black}  $$ Y = Xa + \varepsilon$$  
+
+\color{blue}
+$Y$ \color{black}: variable à expliquer (indépendante)  
+\color{blue}
+$x$ \color{black}: variables explicatives (dépendantes)  
+\color{blue}
+$a_i$ \color{black}: paramètres de régression    
+\color{blue}
+$\varepsilon$ \color{black}: le bruit du modèle $\Longrightarrow \varepsilon \sim N(0,\sigma^2)$  
+
+
+## **La régression linéaire simple**
+* Une droite qui représentera mathématiquement la relation existante entre des variables $\Longrightarrow Y = a + bX$  
+* Quand on tient compte de l'erreur résiduelle de chaque observation $\Longrightarrow$ $\hat{Y} = a + bX + \varepsilon$ 
+
+\begin{figure}[h!]
+\includegraphics[width=0.5\textwidth]{simple_regression.png}
+\footnote{\href{http://www.lacim.uqam.ca/~chauve/Enseignement/BIF7002/Rapports/Geraldine-Asselin/Rapport.html}{adapté d'aprés http://www.lacim.uqam.html}}
+\normalsize
+\end{figure}
+
+## **La régression linéaire multiple**
+\color{blue} Plusieurs tirages \color{black} 
+$$\begin{Bmatrix} y_1 = a_{0} + a_{1} x_{11} + a_{2} x_{12} + ... + a_{p} x_{1p} + \varepsilon_1 \\ y_2 = a_{0} + a_{1} x_{21} + a_{2} x_{22} + ... + a_{p} x_{2p} + \varepsilon_2 \\ \vdots \\ y_i = a_{0} + a_{1} x_{i1} + a_{2} x_{i2}  + ... + a_{p} x_{ip} + \varepsilon_i \\ \vdots \\ y_n = a_{0} + a_{1} x_{n1} + a_{2} x_{n2} + ... + a_{p} x_{np} + \varepsilon_n \end{Bmatrix}$$ 
+
+$$\begin{pmatrix} y_1 \\ y_2 \\ y_i \\ y_n \end{pmatrix} = \begin{bmatrix} 1 & x_{11} & x_{12} & x_{1p} \\ 1 & x_{21} & x_{22} & x_{2p} \\ \vdots & \vdots & \vdots & \vdots \\ 1 & x_{i1} & x_{i2} & x_{ip} \\ 1 & x_{n1} & x_{n2} & x_{np} \end{bmatrix} \times \begin{pmatrix} a_0 \\ a_1 \\ a_2 \\ a_p \end{pmatrix} + \begin{pmatrix} \varepsilon_1 \\ \varepsilon_2 \\ \varepsilon_i \\ \varepsilon_n \end{pmatrix}$$
+
+
+## **Estimation du modèle de la régression linéaire multiple**  
+$$Y = Xa + \varepsilon \Longrightarrow \hat{Y} = X \hat{a} + e$$  
+Avec :  
+
+* $\hat{Y},\hat{a}$: Les paramètres de regression estimés  
+* $e = Y - \hat{Y}$  
+
+Pour calculer les valeurs des paramètres estimés on utilise \color{red} **la méthode  des moindres Carrés** \color{black} qui permet la minimalisation de la somme des Carrés des erreurs.  
+
+$$\Sigma e^2_i = (Y - \hat{Y})(Y - \hat{Y}) \longrightarrow (Y - X\hat{a})(Y - X\hat{a})$$  
+ 
+
+\color{red}
+$$\fbox{$\hat{a}= (X^T \times X)^{-1} \times X^T \times Y$}$$ 
+
+
+
+## **Simulation du modèle de régression linéaire multiple**
+\begin{enumerate}
+\item Exemple 1 une seule simulation avec Sigma fixé   
+\item Exemple 2 plusieurs simulation 
+\begin{itemize} 
+	\item Avec un sigma fixé
+	\item Avec un sigma varié (min ou max)
+	\end{itemize}
+\end{enumerate}  
+
+## **Simulation du modèle de régression linéaire multiple**
+\color{blue} Exemple 1: une seule simulation avec Sigma fixé \color{black}    
+$$ y = a_{0} + a_{1} x_{1} + a_{2} x_{2} + ... + a_{p} x_{p} + \varepsilon $$
+- On tire $\varepsilon \Longrightarrow  \color{red} \varepsilon \sim N(0,\sigma^2)$  
+- On fixe \color{red} $\sigma = 22$ \color{black}: représente le bruit    
+- On fixe le nombre de tirage \color{red} $n = 1000$ \color{black}   
+- Initialisation du nombre de paramètres de régression \color{red} $p = 3$ \color{black} avec $a_1 = 5$ et $a_2,a_3$ sont proportionnels à $a_1$   
+- Initialisation des variables explicatives $x_1, x_2, x_3$ $\Longrightarrow$ loi uniforme  
+- générer une matrice  
+$$\Downarrow$$
+$$\fbox{Estimer la valeur des coefficients}$$  
+$$\fbox{étudier l'ordre d'importance des paramètres}$$
+ 
+
+## **Simulation du modèle de régression linéaire multiple**
+\color{blue} Exemple 1: une seule simulation avec Sigma fixé \color{black}
+```{r echo = FALSE}
+mu <- 0
+sigma <- 22 #bruit
+n= 1000 #nombre de tirages
+eps <- rnorm(n, mu,sigma) #vecteur des n epsilons
+p<- 3 #nombre de paramètres
+a1 <- 5 #valeurs du premier paramètre a1, les ai sont des multiples de a1
+a_i <- a1*(1:p) 
+coeff <- a_i #p coefficients
+
+X <- matrix(0, ncol=p, nrow=n)
+for(i in 1:p){
+  X[,i] <- runif(n)
+}
+
+Y <- (X %*% coeff) + eps
+
+hat <- solve(t(X)%*%X)%*%t(X)%*%Y
+paste("Les paramètres estimés")
+hat
+paste("Les paramètres fixés au départ")
+coeff
+```
+
+## **Comparaison entre paramètres observés et les paramètres estimés**  
+
+- Vérification de la bonne estimation des paramètres selon un seuil fixé arbitrairement à 2   
+**Si \color{blue} $a - \hat{a} < 2 \longrightarrow$ \color{black} bonne estimation**  
+```{r echo = FALSE}
+identite <- function(coeff,hat,s){ #test : si la différence est inférieure à un seuil fixé, on considère hat_i bien estimé
+  diff <- abs(coeff - hat) #différence en valeur absolue des matrices
+  compt <- 0
+  seuil <- s
+  for(i in 1:dim(diff)[1]){
+   if(diff[i]<=seuil){
+    compt = compt +1
+   }
+  }
+return(compt)
+}
+seuil <-2
+
+paste(identite(coeff,hat,seuil), "= nombre de paramètres bien estimés")
+pourcentage <- identite(coeff,hat,seuil)/length(coeff)
+print("La proportion de paramètres bien estimés")
+pourcentage  
+```  
+
+- Vérification de la conservation de l'ordre des paramètres  
+```{r echo = FALSE}
+print("la proportion des p.estimés dans le bon ordre")
+mean(order(hat) == order(coeff))
+``` 
+
+## **Génération d'un modèle linéaire lm() pour notre exemple**  
+\tiny
+```{r echo = FALSE}
+model<-lm(Y~X)
+summary(model)
+
+```  
+
+
+## **Simulation du modèle de régression linéaire multiple**
+\color{blue} Exemple 2: plusieurs simulations avec un sigma fixé \color{black}  
+- replicate() de la fonction simulation   
+- Affichage des résultats 
+
+## **Simulation du modèle de régression linéaire multiple**
+
+```{r echo = FALSE}
+# Clear the console & the R environment
+cat("\014")
+rm(list = ls())
+N<-20 #nombre de simulations
+n= 100 #nombre de tirages par simulations
+sigma <- 22 #valeur de sigma choisie pour minimiser le bruit
+seuil <- 2 #valeur de seuil pour tester l'exactitude de l'estimation des paramètres
+###
+p<- 5 #nombre de coefficients
+a1 <- 5 #valeurs du premiers coefficient a1, les ai sont des multiples de a1
+a_i <- a1*(1:p) 
+coeff <- a_i #p coefficients
+### 
+
+### fonction identité: test : si la différence est inférieure à un seuil fixé, on considère hat_i bien estimé##
+identite <- function(coeff,hat,s){ 
+  diff <- abs(coeff - hat) #différence en valeur absolue des matrices
+  compt <- 0
+  seuil <- s
+  for(i in 1:dim(diff)[1]){
+   if(diff[i]<=seuil){
+    compt = compt +1
+   }
+  }
+return(compt)
+}
+
+simulation <- function(sd,coef,tirage,s){
+  
+  eps <- matrix(rnorm(tirage, 0,sd)) #matrice des n epsilons
+  
+  #initialisation des valeurs X1,...,Xn
+  X <- matrix(0, ncol=length(coef), nrow=tirage) 
+  for(i in 1:length(coef)){
+    X[,i] <- runif(tirage)
+  }
+  #initialisation des valeurs Y
+  Y <- (X %*% coef) + eps
+  
+  #estimation des coefficients
+  hat <- solve(t(X)%*%X)%*%t(X)%*%Y
+  
+  #estimation du pourcentage de coefficients considérés comme bien estimés
+  pourcentage <- identite(coef,hat,s)/length(coef) #diff,coef et hat ont le même nombre de lignes
+  
+  #estimation du pourcentage de coefficients dont l'ordre a été conservé
+  ordre <- mean(order(hat) == order(coef))
+  return(list(pourcent=pourcentage,order=ordre))
+}
+
+res<- replicate(N, simulation(sigma,coeff,n,seuil))
+#res
+```  
+
+```{r echo=FALSE}
+resultat_simu <- function(simulations){
+  #simulations
+  M <- data.frame(matrix(unlist(simulations), ncol = 2, byrow = T))
+  colnames(M) <- c("pourcent", "order")
+  #print(M)
+  
+  pourcentage_moyen <-mean(M$pourcent) 
+  #pourcentage_moyen
+  ordre_moyen <- mean(M$order)
+  
+  plot(M$order, type="p", col="red",xlab="tirage",ylab="pourcentage",main="Pourcentage de paramètres bien ordonnés en fonction des tirages",ylim=c(0,1.2))
+  par(new=TRUE)
+  abline(h=ordre_moyen, col="red")
+  legend("topleft","moyenne",col="red",lwd=1)
+   
+  plot(M$pourcent, type="p", col="blue",xlab="tirage",ylab="pourcentage",main="Pourcentage de paramètres bien estimés en fonction des tirages",ylim=c(0,1.2))
+  par(new=TRUE)
+  abline(h=pourcentage_moyen, col="blue")
+  legend("topleft","moyenne",col="blue",lwd=1)
+  
+ 
+}
+resultat_simu(res)
+```   
+
+
+## **Simulation du modèle de régression linéaire multiple**
+```{r echo = FALSE}
+# Clear the console & the R environment
+cat("\014")
+rm(list = ls())
+N<-20 #nombre de simulations
+n= 100 #nombre de tirages par simulations
+sigma <- 22 #valeur de sigma choisie pour minimiser le bruit
+seuil <- 2 #valeur de seuil pour tester l'exactitude de l'estimation des paramètres
+###
+p<- 5 #nombre de coefficients
+a1 <- 5 #valeurs du premiers coefficient a1, les ai sont des multiples de a1
+a_i <- a1*(1:p) 
+coeff <- a_i #p coefficients
+### 
+
+### fonction identité: test : si la différence est inférieure à un seuil fixé, on considère hat_i bien estimé##
+identite <- function(coeff,hat,s){ 
+  diff <- abs(coeff - hat) #différence en valeur absolue des matrices
+  compt <- 0
+  seuil <- s
+  for(i in 1:dim(diff)[1]){
+   if(diff[i]<=seuil){
+    compt = compt +1
+   }
+  }
+return(compt)
+}
+
+simulation <- function(sd,coef,tirage,s){
+  
+  eps <- matrix(rnorm(tirage, 0,sd)) #matrice des n epsilons
+  
+  #initialisation des valeurs X1,...,Xn
+  X <- matrix(0, ncol=length(coef), nrow=tirage) 
+  for(i in 1:length(coef)){
+    X[,i] <- runif(tirage)
+  }
+  #initialisation des valeurs Y
+  Y <- (X %*% coef) + eps
+  
+  #estimation des coefficients
+  hat <- solve(t(X)%*%X)%*%t(X)%*%Y
+  
+  #estimation du pourcentage de coefficients considérés comme bien estimés
+  pourcentage <- identite(coef,hat,s)/length(coef) #diff,coef et hat ont le même nombre de lignes
+  
+  #estimation du pourcentage de coefficients dont l'ordre a été conservé
+  ordre <- mean(order(hat) == order(coef))
+  return(list(pourcent=pourcentage,order=ordre))
+}
+
+res<- replicate(N, simulation(sigma,coeff,n,seuil))
+#res
+```  
+
+```{r echo=FALSE}
+resultat_simu <- function(simulations){
+  #simulations
+  M <- data.frame(matrix(unlist(simulations), ncol = 2, byrow = T))
+  colnames(M) <- c("pourcent", "order")
+  #print(M)
+  
+  pourcentage_moyen <-mean(M$pourcent) 
+  #pourcentage_moyen
+  ordre_moyen <- mean(M$order)
+  
+  plot(M$pourcent, type="p", col="blue",xlab="tirage",ylab="pourcentage",main="Pourcentage de paramètres bien estimés en fonction des tirages",ylim=c(0,1.2))
+  par(new=TRUE)
+  abline(h=pourcentage_moyen, col="blue")
+  legend("topleft","moyenne",col="blue",lwd=1)
+  
+  
+  plot(M$order, type="p", col="red",xlab="tirage",ylab="pourcentage",main="Pourcentage de paramètres bien ordonnés en fonction des tirages",ylim=c(0,1.2))
+  par(new=TRUE)
+  abline(h=ordre_moyen, col="red")
+  legend("topleft","moyenne",col="red",lwd=1)
+}
+resultat_simu(res)
+```   
+
+## **pourquoi nous avons obtenus ces résulatats ?**
+
+Les coefficients $a_i$ sont des estimateurs. Ils ont une distribution centrée autour de leur valeur théorique.
+
+## **Affichage des résultats des simulations sous forme d'histogrammes**
+\tiny
+```{r echo=FALSE }
+histog_simu <- function(sd,coef,tirage){
+  
+  eps <- matrix(rnorm(tirage, 0,sd)) #matrice des n epsilons
+  
+  #initialisation des valeurs X1,...,Xn
+  X <- matrix(0, ncol=length(coef), nrow=tirage) 
+  for(i in 1:length(coef)){
+    X[,i] <- runif(tirage)
+  }
+  #initialisation des valeurs Y
+  Y <- (X %*% coef) + eps
+  
+  #estimation des coefficients
+  hat <- solve(t(X)%*%X)%*%t(X)%*%Y
+  return(data.frame(hat))
+}
+M <- 200
+res<- replicate(M, histog_simu(sigma,coeff,n))
+res_histo <- do.call(rbind, res)
+library(reshape2)
+library(ggplot2)
+gg <- melt(res_histo)
+ggplot(gg, aes(x=value, fill=Var2)) +
+    geom_histogram(binwidth=1)+
+    facet_grid(Var2~.)
+ggplot(gg)
+```
+
+## **Affichage des résultats des simulations sous forme d'histogrammes**  
+
+
+```{r echo=FALSE }
+M <- 200
+sigma_inf <- 3
+res<- replicate(M, histog_simu(sigma_inf,coeff,n))
+res_histo <- do.call(rbind, res)
+library(reshape2)
+library(ggplot2)
+gg <- melt(res_histo)
+ggplot(gg, aes(x=value, fill=Var2)) +
+    geom_histogram(binwidth=0.3)+
+    facet_grid(Var2~.)
+ggplot(gg)
+```
+
+## **Application du modèle sur des données réelles**  
+Règne : Animalia  
+Embranchement : Mollusca  
+Famille : Haliotididae  
+Genre : Haliotis  
+
+- Mollusques marins à coquille unique, qu'on trouve dans les eaux peu profondes du littoral accrochés aux rochers.
+
+\begin{figure}[h!]
+\includegraphics[width=0.5\textwidth]{abalone.jpg}
+\caption{abalone \footnote{\href{https://dpipwe.tas.gov.au/sea-fishing-aquaculture/recreational-fishing/abalone-fishing}{ https://dpipwe.tas.gov.au/}}}
+\normalsize
+\end{figure}
+
+
+## **Application du modèle sur des données réelles**
+\tiny
+```{r echo=FALSE}
+data(abalone)
+matrice <- scale(as.matrix(abalone[,2:8]))
+modele_lineaire <- lm(abalone$Rings ~ matrice)
+modele_lineaire <- summary(modele_lineaire)
+print(modele_lineaire)
+```
+\normalsize  
+
+
+## **Détermination des données nécéssaires à la simulation**  
+
+- A l'aide du modèle linéaire on détermine la valeur des coefficients associés à chaque paramètre.  
+- Calcul de $\varepsilon = Y - X(X^TX)^{-1}X^TY$ .  
+- Calcul de $\sigma$
+
+```{r echo=FALSE}
+#Y_abalone <- abalone$Rings #non centré
+#Xi_abalone <- as.matrix(abalone[,2:8]) #les valeurs ne sont pas centrées
+Y_abalone <- scale(abalone$Rings) #centré
+Xi_abalone <- as.matrix(scale(abalone[,2:8])) #les valeurs sont centrées
+eps_abalone <- Y_abalone - Xi_abalone%*%solve(t(Xi_abalone)%*%Xi_abalone) %*%t(Xi_abalone)%*%Y_abalone 
+sigma_abalone <- sd(eps_abalone)
+sigma_abalone
+```
+
+
+## **Histogramme de l'estimation des coefficients $\hat{a_i}$**
+
+
+```{r echo=FALSE }
+coeff1_abalone <- unname(modele_lineaire$coefficients[,1]) #extraction des valeurs "estimate"
+coeff_abalone <- coeff1_abalone[2:length(coeff1_abalone)] #extraction des valeurs "estimate" en enlevant intercept
+#print(coeff_abalone)
+faux_coeff <- seq(min(coeff_abalone), max(coeff_abalone), length.out = length(coeff_abalone))
+M <- 200
+res<- replicate(M, histog_simu(sigma_abalone,faux_coeff,dim(abalone)[1]))
+res_histo <- do.call(rbind, res)
+library(reshape2)
+library(ggplot2)
+gg <- melt(res_histo)
+ggplot(gg, aes(x=value, fill=Var2)) +
+    geom_histogram(binwidth=0.3)+
+    facet_grid(Var2~.)
+```
+
+
+## **Comparaison avec les vraies valeurs coeff_abalone**
+
+```{r echo=FALSE}
+M <- 200
+res<- replicate(M, histog_simu(sigma_abalone,coeff_abalone,dim(abalone)[1]))
+res_histo <- do.call(rbind, res)
+library(reshape2)
+library(ggplot2)
+gg <- melt(res_histo)
+ggplot(gg, aes(x=value, fill=Var2)) +
+    geom_histogram(binwidth=0.3)+
+    facet_grid(Var2~.)
+```
+
+ 
+## **Conclusion**  
+
+-	La précision des outils de mesures.
+-	La perte d’information au cours des mesures.
+-	Des variables explicatives non exhaustives.
+-	Un modèle de régression pas assez précis.
+
+## **Perspectives**
+- Compréhension du sujet.  
+- Utilisation de ggplot.  
+- Utilisation du Latex.
+- Github.
+- Géneration des package.
+
+## **Reférences**
+
+- https://web.maths.unsw.edu.au/~lafaye/textes/livreR2014.pdf  
+- https://tice.agroparistech.fr/coursenligne/courses/STAV/document/Poly/ModLin_CoursExemples_R.pdf?cidReq=STAV  
+- https://stackoverflow.com/  
+- https://www.rdocumentation.org  
+
+
+
+
+
+
+
