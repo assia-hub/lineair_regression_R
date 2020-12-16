@@ -4,9 +4,124 @@ Title: La régression linéaire multiple et l'estimation de l'age des abalons av
 Version: 0.1.0
 Author: Assia Benmehdia / Pauline Spinga 
 Maintainer: The package maintainer <benmehdia.assia@gmail.com><spinga.pauline@gmail.com>
-Description: ensemble de fonctions utiles à la réalisation de simulations dans le cadre de 
+Description: 
+ensemble de fonctions utiles à la réalisation de simulations dans le cadre de 
 l’étude de la régression linéaire multiple et qui permet également l'estimation de l'age des abalons 
 à partir de plusieurs paramètres quantitatives .
+
+Pour ce projet nous avons construit et utilisé un package de 4 fonctions :
+Brève présentation du package :
+Les 4 fonctions établies pour ce projet à savoir :
+- identite(coeff,hat,seuil)
+- simulation(sigma,coeff,n,seuil)
+- resultat_simu(res)
+- histog_simu(sigma_inf,coeff,n)
+Tout d’abord, un modèle de régression linéaire est un modèle qui cherche à établir une
+relation linéaire entre une variable, dite expliquée, et une ou plusieurs variables, dites
+explicatives.
+La différence entre la régression linéaire simple et le multiple est donc le nombre de
+variables impliquées
+Ainsi, on pose généralement Y (la variable expliquée) telle que Y est une combinaison linéaire
+des paramètres de régression, auquel est également associé un bruit epsilon.
+Dans un modèle de régression linéaire simple, il s’agit de déterminer la droite (a + bX)
+caractérisant le mieux le nuage de points.
+Représentation matricielle de Y où chaque yi dépend des paramètres de régression et d’un
+bruit
+Simuler des données revient à faire une estimation du modèle de régression. La méthode
+utilisée est celle des moindres carrés qui permet la minimalisation de la somme des carrés des
+erreurs
+Exemple 1 :
+Dans un premier temps il s’est agi de simuler des données.
+On a considéré un modèle linéaire dont Y, la donnée étudiée dépend de n paramètres X1,…Xn
+de poids distincts et d’un bruit epsilon.
+Le bruit epsilon est tiré selon une loi normale centrée et d’écart type sigma.
+Dans cet exemple on choisit une valeur de sigma (22) assez faible pour minimiser le bruit mais
+assez élevée pour voir son influence dans l’estimation des paramètres.
+Le nombre de tirage est fixé à 1000.
+On considère que les poids/ coefficient de chaque paramètre a_i sont proportionnels les uns
+par rapport aux autres et dépendent de la variable associée. C’est-à-dire X1 a le coefficient
+minimal et Xn a le coefficient maximal.
+En fixant le nombre de paramètres à 3 et la valeur du premier coefficient à 5, on obtient les
+paramètres réels de notre modèle simulé, à savoir Y= 5X1 + 10X2 + 15X3 + eps
+Il s’agit ensuite d’initialiser nos variables explicatives X1, X2,X3 selon une loi uniforme et de
+générer une matrice Y telle que chaque valeur yi est une combinaison linéaire des X1, X2,X3
+et auquel est associé un bruit epsilon.
+L’objectif est d’estimer la valeur des coefficients et donc d’étudier l’ordre d’importance des
+paramètres.
+Ici les ai estimés valent a1 = 7 a2=8 a3=14 (pour rappel les valeurs réelles étaient 5,10,15)
+On compare ainsi les ai estimés et les ai réels de 2 façons :
+- A l’aide de la fonction identité : cette fonction permet, pour chaque coefficient ai de
+calculer sa différence avec sa valeur réelle. Si cette différence est supérieure à un seuil
+(ici fixé arbitrairement à 2), on considère le paramètre bien estimé. On retourne alors
+un pourcentage/proportion de paramètres bien estimés. Dans notre exemple la
+différence calculée n’est pas significative, on considère que 100% de nos paramètres
+sont bien estimés
+- Dans un second temps il s’agit de regarder si l’ordre des paramètres est conservé. En
+effet, leur estimation avec la fonction identité peut s’avérer mauvaise en termes de
+valeur mais si l’estimation et les valeurs réelles ont un même comportement, le
+modèle linéaire peut être considéré comme respecté.
+Ainsi, on moyenne les valeurs estimées dans le bon ordre
+De manière plus simple : nos a_i réels ont été choisis dans l’ordre croissant. Nos a_i
+estimés sont également rangés dans l’ordre croissant. On peut considérer les
+coefficients bien estimés. L’importance de chaque paramètres/Variable (X1,X2,X3) est
+respecté
+Enfin il s’agit de vérifier si nos estimations sont bonnes en générant un modèle linéaire via la
+fonction lm().
+Il y a bien corrélation entre nos paramètres estimés et ceux estimés par le modèle.
+Dans cet exemple, nous effectuons donc 1 seule simulation pour la valeur de sigma choisie.
+Exemple 2 :
+Afin d’avoir des résultats exploitables il s’agit d’effectuer un N simulations
+Pour cela :
+- Nous avons établi une fonction nommée « simulation » qui reprend les étapes
+précédemment explicitées et qui retourne à chaque nouvelle simulation une liste
+contenant les deux types de %
+- Voici 2 dotplots représentant la répartition des valeurs calculées autour de leur
+moyenne.
+Pourquoi ce résultat :
+Les coefficients âi sont des estimateurs. Ils ont donc une distribution centrée autour de leur
+valeur théorique.
+La fonction histog_simu permet de représenter sous forme d’histogramme les résultats.
+On constate par la localisation des histogrammes, que les estimateurs a_i sont ordonnés.
+Cependant, ils ont une répartition centrée autour de leur valeur théorique.
+On n’obtient pas de « courbe en cloche » caractéristique de la loi normale centrée. En effet ce
+résultat était prévisible puisque l’étendue des valeurs sera d’autant plus grande que le bruit
+epsilon et donc sigma est élevé.
+Pour confirmer notre hypothèse, on réalise à nouveau des simulations avec une valeur de
+sigma moindre. L’ordre des estimateurs est conservé et ils sont davantage centrés autour de
+leur valeur théorique
+Application avec les données abalone
+Il s’agit de prédire l’âge des ormeaux (rings : nombre d’anneaux sur la coquille) en fonction de
+7 variables explicatives telles que le diamètre, le poids, la longueur…
+A l’aide du modèle linéaire, on détermine la valeur des coefficients associés à chaque
+paramètre.
+On détermine ainsi la valeur d’epsilon telle que eps = Y – Y_chapeau et on en déduit sigma tel
+que sigma est la racine carrée de la variance d’epsilon
+Afin de déterminer si nos estimations sont significatives il s’agit de réaliser des simulations.
+On détermine une matrice de coefficients choisis entre le min et le max des coefficients
+théoriques.
+La valeur de sigma étant moindre, l’estimation des coefficients est centrée, pour ne pas dire
+égale à leur valeur théorique.
+Avec nos simulations on obtient que : l’ordre des paramètres est conservé et leur valeur bien
+estimée.
+Résultats/Discussion
+Peut-on croire nos résultats ?
+On affiche l’histogramme des coefficients réels. D’un point de vue visuel on en conclut que
+nos estimations ne sont pas significatives de la réalité, en termes d’ordre d’importance et de
+valeurs
+Ce résultat était attendu puis les coefficients tirés pour nos simulations sont certes déterminés
+à partir des valeurs théoriques mais toujours dans un ordre croissant et à intervalles réguliers,
+ce qui n’est pas le cas dans le modèle linéaire.
+Conclusion :
+L’estimation des paramètres de régression est une méthode intéressante pour étudier le poids
+et l’importance de chaque variable explicative dans un modèle. Cependant, les valeurs
+obtenues ne sont pas toujours significatives. L’erreur peut ainsi être due à plusieurs facteurs
+tels que :
+- La précision des outils de mesures
+- La perte d’information au cours des mesures
+- Des variables explicatives non exhaustives
+- Un modèle de régression pas assez précis
+
+
 License: MIT
 Encoding: UTF-8
 LazyData: true
