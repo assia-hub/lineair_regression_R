@@ -1,0 +1,12 @@
+Package: regressionMultiple
+Type: Package
+Title: La régression linéaire multiple et l'estimation de l'age des abalons avec R 
+Version: 0.1.0
+Author: Assia Benmehdia / Pauline Spinga 
+Maintainer: The package maintainer <benmehdia.assia@gmail.com><spinga.pauline@gmail.com>
+Description: ensemble de fonctions utiles à la réalisation de simulations dans le cadre de 
+l’étude de la régression linéaire multiple et qui permet également l'estimation de l'age des abalons 
+à partir de plusieurs paramètres quantitatives .
+License: MIT
+Encoding: UTF-8
+LazyData: true
